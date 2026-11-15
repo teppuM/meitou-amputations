@@ -152,32 +152,57 @@ def skeleton_bed():
     return [base, saw], top
 
 
-def figure(at, top):
-    """A human laid on its back along the table, head at the -X end, for scale (the mesh at rest, without its skeleton)."""
+HUM = 'E:/Claude/Kenshi/tools/clothing-test/cache/hum/'   # the body and skeleton, copied from the install for reference only
+
+
+def figure(at, top, frac=0.5):
+    """A human in the game's own 'sleepinbed' animation (the clip a bed's occupant plays), its pelvis put over the table's middle, for scale."""
     bpy.ops.object.select_all(action='DESELECT')
     before = set(bpy.data.objects)
-    IMP.kenshi_ogre_objects(filepath=K + 'character/meshes/human/human_male.mesh', import_animations=False, create_materials=True,
-                            cleanup_vertices='DEFAULT')
+    IMP.kenshi_ogre_objects(filepath=HUM + 'human_male.mesh', import_animations=True, create_materials=True, cleanup_vertices='DEFAULT',
+                            import_shapekeys=False)
     new = [o for o in bpy.data.objects if o not in before]
-    body = next(o for o in new if o.type == 'MESH')
-    mw = body.matrix_world.copy(); body.parent = None; body.matrix_world = mw
-    for mod in list(body.modifiers): body.modifiers.remove(mod)
+    arm = next(o for o in new if o.type == 'ARMATURE')
     for o in new:
-        if o is not body: bpy.data.objects.remove(o)
-    body.data.materials.clear(); m = bpy.data.materials.new('skin'); m.diffuse_color = (0.6, 0.45, 0.35, 1); body.data.materials.append(m)
-    body.rotation_euler = (0, math.radians(-90), 0)
-    body.location = (at[0] + 9.5, at[1], top + 2.0)
-    return [body]
+        if o.type == 'MESH':
+            o.data.materials.clear(); m = bpy.data.materials.new('skin'); m.diffuse_color = (0.6, 0.45, 0.35, 1); o.data.materials.append(m)
+    for o in new:                      # carried with the skeleton when it is moved (the import links them by modifier only)
+        if o.type == 'MESH' and o.parent is None:
+            o.parent = arm; o.matrix_parent_inverse = arm.matrix_world.inverted()
+    act = bpy.data.actions['sleepinbed']
+    if not arm.animation_data: arm.animation_data_create()
+    arm.animation_data.action = act
+    if hasattr(act, 'slots') and len(act.slots): arm.animation_data.action_slot = act.slots[0]
+    f0, f1 = act.frame_range
+    bpy.context.scene.frame_set(int(round(f0 + (f1 - f0) * frac)))
+    bpy.context.view_layer.update()
+    return new, arm
+
+
+def place(arm, bodies, at, top):
+    """Turns the posed body so its head points to the table's -X end (the head cushion) and puts its pelvis over (at) at height top."""
+    arm.rotation_euler.z = 0
+    bpy.context.view_layer.update()
+    pel = arm.matrix_world @ arm.pose.bones['Bip01 Pelvis'].head
+    head = arm.matrix_world @ arm.pose.bones['Bip01 Head'].head
+    d = head - pel
+    arm.rotation_euler.z = math.pi - math.atan2(d.y, d.x)
+    bpy.context.view_layer.update()
+    pel = arm.matrix_world @ arm.pose.bones['Bip01 Pelvis'].head
+    arm.location += Vector((at[0] - 1.5, at[1], top)) - pel
+    bpy.context.view_layer.update()
+    dg = bpy.context.evaluated_depsgraph_get()
+    low = min((o.matrix_world @ v.co).z for o in bodies if o.type == 'MESH' for v in o.evaluated_get(dg).to_mesh().vertices)
+    arm.location.z += top - 0.6 - low        # its back on the surface
+    print('PLACED lowest', round(low, 2), 'surface', round(top - 0.6, 2))
 
 
 table, ttop = operating_table()
 skel, stop = skeleton_bed()
 for o in skel: o.location.x += 45
-fig1 = figure((0, 0), ttop + 0.6)
-body2 = fig1[0].copy(); body2.data = fig1[0].data.copy(); bpy.context.scene.collection.objects.link(body2)
-body2.location = (45 + 9.5, 0, stop + 0.4 + 2.0)
-fig2 = [body2]
-
+fig1, arm1 = figure((0, 0), ttop + 1.0)
+fig2 = []
+place(arm1, fig1, (0, 0), ttop + 1.6)
 for o in bpy.data.objects:
     if o.type == 'MESH':
         mn = Vector([min((o.matrix_world @ Vector(c))[i] for c in o.bound_box) for i in range(3)])
@@ -206,6 +231,7 @@ shot('pair', 22, 30, 28, 85, figures_on=False)
 shot('table', 0, 35, 30, 42, figures_on=False)
 shot('table_patient', 0, 35, 30, 42)
 shot('skeleton', 45, 35, 28, 46, figures_on=False)
+place(arm1, fig1, (45, 0), stop + 1.4)
 shot('skeleton_patient', 45, 35, 28, 46)
 shot('table_side', 0, 100, 15, 42, figures_on=False)
 bpy.ops.wm.save_as_mainfile(filepath=W + 'draft/tables_draft.blend')
