@@ -201,7 +201,8 @@ public sealed class SurgerySystem : ITickSystem, IOrderOwner, ITaskOwner, ITaskH
             return;
         }
 
-        var entry = new OrderEntry(Row, this) { Target = order.Patient, Detail = order.Limbs };
+        // One limb per operation: of several named, the first in slot order.
+        var entry = new OrderEntry(Row, this) { Target = order.Patient, Detail = order.Limbs & -order.Limbs };
         if (PlayerOrders.CanRun(world, s, entry).CanRun) PlayerOrders.Give(world, s, entry, order.Queued);
     }
 

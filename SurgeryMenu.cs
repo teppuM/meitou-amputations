@@ -11,7 +11,7 @@ namespace OperatingTables;
 /// The "Surgery..." row and its menu. The row goes on the right-click menu of the player's own character lying on an Operating Table or a Skeleton
 /// Operating Bed while another character is selected (a postfix on <c>Meitou.Game.Ui.ContextMenuWindow.Verbs</c>, internal, found by name). It opens
 /// the mod's menu in its place, drawn as the game draws its right-click menu, in the HUD's overlay slot: the patient's name, then Left Arm, Right Arm,
-/// Both Arms, Left Leg, Right Leg, Both Legs, All Limbs. A row whose limbs are all gone (stumps or prosthetics) has grey text and cannot be clicked;
+/// Left Leg, Right Leg (one limb per operation). A row whose limb is gone (stumps or prosthetics) has grey text and cannot be clicked;
 /// a click elsewhere closes the menu. A row gives the nearest selected character other than the patient the operation.
 /// </summary>
 sealed class SurgeryMenu : IUiExtension
@@ -99,7 +99,7 @@ sealed class SurgeryMenu : IUiExtension
     /// </summary>
     internal static readonly (string Caption, int Limbs)[] Rows =
     [
-        ("Left Arm", 1), ("Right Arm", 2), ("Both Arms", 3), ("Left Leg", 4), ("Right Leg", 8), ("Both Legs", 12), ("All Limbs", 15),
+        ("Left Arm", 1), ("Right Arm", 2), ("Left Leg", 4), ("Right Leg", 8),
     ];
 
     /// <summary>
