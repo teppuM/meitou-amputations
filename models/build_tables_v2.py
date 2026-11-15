@@ -3,7 +3,7 @@
 # three leather straps; at the foot a small table with a hacksaw, an angle grinder, pliers, medical supplies and a first-aid kit; a wooden bowl under
 # the middle to catch blood; the standing strip light at the head as the surgery lamp; the medical crate beside the head (its own texture).
 # Skeleton Operating Bed: the Skeleton Repair Bed; the boiler tank at the foot as its oil drum, joined by an exhaust pipe; the peeler blade stack at the
-# side as the cutting tower; a metal table beside it with robot limb pieces, a robotics repair kit, a grinder and a wrench.
+# side ... removed (Jame: no peeler parts); a metal table beside it with robot limb pieces, a robotics repair kit, a grinder and a wrench.
 # Renders only (draft2/*.png). Run: blender -b --factory-startup -P build_tables_v2.py
 import bpy, bmesh, math, os, addon_utils
 from mathutils import Vector
@@ -61,6 +61,30 @@ def sit_on(o, z):
     bpy.context.view_layer.update()
 
 
+def rest_on(o, support):
+    """Lowers or lifts o until it rests on support's surface: rays cast straight down through o's footprint (a 5 x 5 grid) find the surface
+    under each point, and o's lowest point goes to the highest surface found, so nothing hangs in the air or sinks through."""
+    from mathutils.bvhtree import BVHTree
+    bpy.context.view_layer.update()
+    dg = bpy.context.evaluated_depsgraph_get()
+    tree = BVHTree.FromObject(support, dg)
+    inv = support.matrix_world.inverted()
+    lo, hi = bounds(o)
+    best = None
+    for i in range(5):
+        for j in range(5):
+            x = lo.x + (hi.x - lo.x) * (0.1 + 0.2 * i); y = lo.y + (hi.y - lo.y) * (0.1 + 0.2 * j)
+            origin = inv @ Vector((x, y, hi.z + 50))
+            d = (inv.to_3x3() @ Vector((0, 0, -1))).normalized()
+            hit = tree.ray_cast(origin, d)
+            if hit[0] is not None:
+                z = (support.matrix_world @ hit[0]).z
+                best = z if best is None else max(best, z)
+    if best is None: raise RuntimeError(f'{o.name}: no surface under it')
+    sit_on(o, best)
+    print('REST', o.name, 'on', support.name, round(best, 2))
+
+
 def strap(name, x, top, width, region=(420, 3072 + 150, 505, 3072 + 620)):
     """A leather strap over the mattress: a thin band arched across the table with its ends tucked down the sides (furniture atlas strap strip)."""
     bm = bmesh.new()
@@ -116,7 +140,7 @@ def operating_table():
              piece('items/meshes/Item_Tools.mesh', ATLAS, at=(18.4, 4.4, 0), rot=(0, 0, 15)),
              piece('items/meshes/Item_Medical_Supplies.mesh', ATLAS, at=(21.0, -0.6, 0), rot=(0, 0, 10)),
              piece('items/meshes/Item_Advanced_First_Aid_Kit.mesh', ATLAS, at=(20.4, 6.4, 0), rot=(0, 0, 95))]
-    for t in tools: sit_on(t, tt)
+    for t in tools: rest_on(t, tray)
     bowl = piece('items/meshes/Item_Bowl_Wood.mesh', ATLAS, at=(1.5, 0, 0), scale=1.6, name='blood_bowl'); sit_on(bowl, 0)
     lamp = piece('buildings/lights/strip_light1.mesh', ATLAS, at=(-15.5, -5.5, 0), name='surgery_lamp'); sit_on(lamp, 0)
     crate = piece('buildings/furniture/medicrate.mesh', 'ref/tex/medicrate_d.png', at=(-19.5, 6.5, 0), rot=(0, 0, 90), scale=0.45, name='medical_crate')
@@ -128,19 +152,16 @@ def skeleton_bed(dx):
     base = piece('buildings/furniture/new_furniture01/Robot Repair Bed.mesh', ROBO, at=(dx, 0, 0), name='skeleton_bed_base')
     tank = piece('buildings/furniture/new_furniture01/boiler_tank1.mesh', ATLAS, at=(dx + 19.5, -4.0, 0), scale=0.7, name='oil_drum'); sit_on(tank, 0)
     pipe = piece('buildings/furniture/new_furniture01/exaust_pipe1.mesh', ATLAS, at=(dx + 15.5, -4.0, 4.0), rot=(0, 90, 0), scale=0.6, name='oil_pipe')
-    blades = piece('buildings/furniture/new_furniture01/Peeler-Blade stack 01.mesh', 'ref/tex/Peeler_DIF_HI.png', at=(dx + 4.0, -12.5, 0), scale=0.75,
-                   name='blade_tower')
-    sit_on(blades, 0)
     bench = piece('buildings/furniture/metaltable01.mesh', 'ref/tex/ATLAS_interior.png', at=(dx - 2.0, 15.5, 0), scale=0.7, name='parts_bench')
     sit_on(bench, 0)
     bt = bounds(bench)[1].z
     limbs = piece('buildings/crafting/BENCH Robot Limb-pieces.mesh', 'ref/tex/BENCH Robot Limbs_DIF.png', at=(dx - 2.0, 15.5, 0), scale=0.28,
                   name='limb_pieces')
-    sit_on(limbs, bt - 0.2)
-    kit = piece('items/meshes/Item_Robot_Repair_Kit.mesh', ATLAS, at=(dx + 6.5, 15.0, 0), rot=(0, 0, 20)); sit_on(kit, bt)
-    grinder = piece('items/meshes/Item_Tools3.mesh', ATLAS, at=(dx - 9.0, 15.8, 0), rot=(0, 0, -60)); sit_on(grinder, bt)
-    wrench = piece('items/meshes/Item_Tools2.mesh', ATLAS, at=(dx - 5.5, 14.2, 0), rot=(0, 0, 10)); sit_on(wrench, bt)
-    return [base, tank, pipe, blades, bench, limbs, kit, grinder, wrench]
+    rest_on(limbs, bench)
+    kit = piece('items/meshes/Item_Robot_Repair_Kit.mesh', ATLAS, at=(dx + 6.5, 15.0, 0), rot=(0, 0, 20)); rest_on(kit, bench)
+    grinder = piece('items/meshes/Item_Tools3.mesh', ATLAS, at=(dx - 9.0, 15.8, 0), rot=(0, 0, -60)); rest_on(grinder, bench)
+    wrench = piece('items/meshes/Item_Tools2.mesh', ATLAS, at=(dx - 5.5, 14.2, 0), rot=(0, 0, 10)); rest_on(wrench, bench)
+    return [base, tank, pipe, bench, limbs, kit, grinder, wrench]
 
 
 HUM = 'E:/Claude/Kenshi/tools/clothing-test/cache/hum/'
