@@ -16,7 +16,7 @@ OUT = W + 'draft2/'
 os.makedirs(OUT, exist_ok=True)
 for o in list(bpy.data.objects): bpy.data.objects.remove(o)
 
-RAISE = 1.3
+RAISE = 1.0          # the Bed's own height: the sleep animation lays the body at the Bed's mattress height (its use nodes stand on the floor)
 MATS = {}
 
 
@@ -199,33 +199,119 @@ def place(arm, bodies, at, surface):
 
 table, top = operating_table()
 skel = skeleton_bed(55)
-body, arm = figure()
+RENDER = os.environ.get('RENDER', '1') == '1'
+EXPORT = os.environ.get('EXPORT', '0') == '1'
 
-sc = bpy.context.scene
-sc.render.engine = 'BLENDER_WORKBENCH'; sc.display.shading.light = 'STUDIO'; sc.display.shading.color_type = 'TEXTURE'
-sc.display.shading.show_shadows = True
-sc.render.resolution_x = 1200; sc.render.resolution_y = 700
-cam = bpy.data.cameras.new('c'); co = bpy.data.objects.new('c', cam); sc.collection.objects.link(co); sc.camera = co
-cam.type = 'ORTHO'
+if RENDER:
+    body, arm = figure()
+    sc = bpy.context.scene
+    sc.render.engine = 'BLENDER_WORKBENCH'; sc.display.shading.light = 'STUDIO'; sc.display.shading.color_type = 'TEXTURE'
+    sc.display.shading.show_shadows = True
+    sc.render.resolution_x = 1200; sc.render.resolution_y = 700
+    cam = bpy.data.cameras.new('c'); co = bpy.data.objects.new('c', cam); sc.collection.objects.link(co); sc.camera = co
+    cam.type = 'ORTHO'
 
+    def shot(tag, cx, ang, el, scale, patient=None):
+        for o in body: o.hide_render = patient is None
+        if patient: place(arm, body, *patient)
+        cam.ortho_scale = scale
+        a = math.radians(ang); e = math.radians(el); r = 200
+        co.location = (cx + r * math.sin(a) * math.cos(e), -r * math.cos(a) * math.cos(e), 7 + r * math.sin(e))
+        co.rotation_euler = (math.radians(90) - e, 0, a)
+        cam.clip_end = 1000
+        sc.render.filepath = OUT + f'{tag}.png'; bpy.ops.render.render(write_still=True)
 
-def shot(tag, cx, ang, el, scale, patient=None):
-    for o in body: o.hide_render = patient is None
-    if patient: place(arm, body, *patient)
-    cam.ortho_scale = scale
-    a = math.radians(ang); e = math.radians(el); r = 200
-    co.location = (cx + r * math.sin(a) * math.cos(e), -r * math.cos(a) * math.cos(e), 7 + r * math.sin(e))
-    co.rotation_euler = (math.radians(90) - e, 0, a)
-    cam.clip_end = 1000
-    sc.render.filepath = OUT + f'{tag}.png'; bpy.ops.render.render(write_still=True)
+    tag = os.environ.get('TAG', '')
+    shot('table' + tag, 2, 35, 30, 50)
+    shot('table_patient' + tag, 2, 35, 30, 50, ((0, 0), top - 0.3))
+    shot('table_low' + tag, 2, 200, 6, 50)
+    shot('skeleton' + tag, 57, 35, 30, 56)
+    shot('skeleton_patient' + tag, 57, 35, 30, 56, ((55, 0), 7.4))
+    shot('skeleton_back' + tag, 57, 215, 30, 56)
+    for o in body: bpy.data.objects.remove(o)
 
+if EXPORT:
+    import json
+    EXP = getattr(bpy.ops, 'export')
+    DIST = os.environ['DIST']
+    os.makedirs(DIST, exist_ok=True)
+    report = {}
 
-shot('table', 2, 35, 30, 50)
-shot('table_patient', 2, 35, 30, 50, ((0, 0), top - 0.3))
-shot('table_low', 2, 200, 6, 50)
-shot('table_back', 2, 215, 30, 50)
-shot('skeleton', 57, 35, 30, 56)
-shot('skeleton_patient', 57, 35, 30, 56, ((55, 0), 7.4))
-shot('skeleton_back', 57, 215, 30, 56)
-bpy.ops.wm.save_as_mainfile(filepath=OUT + 'tables_draft2.blend')
+    def flatten(objs):
+        """Each object made a plain mesh in building space: modifiers applied, transforms applied, one UV layer named UVMap."""
+        for o in objs:
+            bpy.ops.object.select_all(action='DESELECT'); o.select_set(True); bpy.context.view_layer.objects.active = o
+            if o.modifiers: bpy.ops.object.convert(target='MESH')
+            bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+            uvs = o.data.uv_layers
+            while len(uvs) > 1: uvs.remove(uvs[-1])
+            if len(uvs): uvs[0].name = 'UVMap'
+
+    def join(name, objs, shift=0.0):
+        flatten(objs)
+        bpy.ops.object.select_all(action='DESELECT')
+        for o in objs: o.select_set(True)
+        bpy.context.view_layer.objects.active = objs[0]
+        if len(objs) > 1: bpy.ops.object.join()
+        o = bpy.context.view_layer.objects.active
+        o.name = name
+        if shift:
+            o.data.transform(__import__('mathutils').Matrix.Translation((-shift, 0, 0)))
+        o.data.materials.clear(); o.data.materials.append(o.data.materials.get(name) or bpy.data.materials.new(name))
+        return o
+
+    def export_mesh(o, fname):
+        bpy.ops.object.select_all(action='DESELECT'); o.select_set(True); bpy.context.view_layer.objects.active = o
+        path = os.path.join(DIST, fname)
+        r = EXP.kenshi_ogre_objects(filepath=path, export_version='V_1_10', tangent_format='TANGENT_4')
+        report[fname] = (str(r), os.path.getsize(path) if os.path.exists(path) else None)
+
+    def col_box(name, lo, hi):
+        if bpy.context.scene.rigidbody_world is None: bpy.ops.rigidbody.world_add()
+        bpy.ops.mesh.primitive_cube_add(size=1, location=[(a + b) / 2 for a, b in zip(lo, hi)])
+        o = bpy.context.object; o.name = name; o.scale = [b - a for a, b in zip(lo, hi)]
+        bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+        bpy.ops.rigidbody.object_add(); o.rigid_body.type = 'PASSIVE'; o.rigid_body.collision_shape = 'BOX'
+        return o
+
+    def export_collision(objs, fname):
+        bpy.ops.object.select_all(action='DESELECT')
+        for o in objs: o.select_set(True)
+        bpy.context.view_layer.objects.active = objs[0]
+        path = os.path.join(DIST, fname)
+        r = EXP.kenshi_physx_objects(filepath=path, objects='SELECTED', transform='SCENE')
+        report[fname] = (str(r), os.path.getsize(path) if os.path.exists(path) else None)
+
+    def box_of(objs, shift=0.0, pad=0.0):
+        lo = Vector((1e9, 1e9, 1e9)); hi = -lo
+        for o in objs:
+            a, b = bounds(o)
+            lo = Vector(map(min, lo, a)); hi = Vector(map(max, hi, b))
+        lo.x -= shift; hi.x -= shift
+        return [lo.x - pad, lo.y - pad, max(lo.z, 0)], [hi.x + pad, hi.y + pad, hi.z]
+
+    by = {o.name: o for o in table}
+    frame = by['table_frame']; tray = by['instrument_table']; crate = by['medical_crate']; lamp = by['surgery_lamp']
+    tcol = [col_box('optab_table_COL0', *box_of([frame])), col_box('optab_table_COL1', *box_of([tray])),
+            col_box('optab_table_COL2', *box_of([crate])), col_box('optab_table_COL3', *box_of([lamp], pad=0.3))]
+    by2 = {o.name: o for o in skel}
+    scol = [col_box('optab_skel_COL0', *box_of([by2['oil_drum']], 55)), col_box('optab_skel_COL1', *box_of([by2['parts_bench']], 55))]
+    for o in tcol + scol: o.location.x += 0
+    for o in scol:
+        o.location.x -= 0
+    export_collision(tcol, 'optab_table_COL.xml')
+    export_collision(scol, 'optab_skel_COL.xml')
+    for o in tcol + scol: bpy.data.objects.remove(o)
+
+    t_crate = [crate]
+    t_atlas = [o for o in table if o is not crate]
+    export_mesh(join('optab_table_atlas', t_atlas), 'optab_table_atlas.mesh')
+    export_mesh(join('optab_table_crate', t_crate), 'optab_table_crate.mesh')
+    s_atlas = [by2[n] for n in ('oil_drum', 'oil_pipe')] + [o for o in skel if o.name.startswith('Item_')]
+    export_mesh(join('optab_skel_atlas', s_atlas, 55), 'optab_skel_atlas.mesh')
+    export_mesh(join('optab_skel_bench', [by2['parts_bench']], 55), 'optab_skel_bench.mesh')
+    export_mesh(join('optab_skel_limbs', [by2['limb_pieces']], 55), 'optab_skel_limbs.mesh')
+    for k, v in report.items(): print('EXPORT', k, v)
+    json.dump(report, open(os.path.join(DIST, 'export_report.json'), 'w'), indent=1)
+
 print('DONE')

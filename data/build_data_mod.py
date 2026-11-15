@@ -7,6 +7,7 @@ import struct
 import sys
 
 FILE = 'OperatingTables.mod'
+BS = chr(92)    # the backslash of the game's file paths
 BASE = ['gamedata.base', 'Newwworld.mod', 'Dialogue.mod', 'rebirth.mod']
 KINDS = ['bool', 'float', 'int', 'vec3', 'vec4', 'str', 'file']
 
@@ -134,8 +135,32 @@ def main(data, out):
     surgery['f']['description'] = 'Unlocks the Operating Table, where a surgeon can remove a patient\'s limbs.'
     robots['f']['description'] = 'Unlocks the Skeleton Operating Bed, where a surgeon can remove a skeleton\'s limbs. It also repairs faster.'
 
-    records = [table, bed, surgery, robots]
+    # The models (models/build_tables_v2.py, exported to the mod folder): one part per texture, each using the game's own material record for that
+    # texture; the Skeleton Operating Bed keeps the Skeleton Repair Bed's own part as its base.
+    bed_part = by_name(m, 29, 'bed1_part')
+    folder = '.' + BS + 'mods' + BS + 'OperatingTables' + BS
+    sid = iter(range(5, 100))
+
+    def part(name, mesh, material, collision=''):
+        p = copy(m, bed_part, f'{next(sid)}-{FILE}', name)
+        p['f']['phs or mesh'] = folder + mesh
+        p['f']['xml collision'] = folder + collision if collision else ''
+        p['refs'] = {'material': [material]}    # the source part's own reference, values included
+        return p
+
+    atlas = m[bed_part]['refs']['material'][0]
+    table_parts = [part('optab table atlas', 'optab_table_atlas.mesh', atlas, 'optab_table_COL.xml'),
+                   part('optab table crate', 'optab_table_crate.mesh', m[by_name(m, 29, 'medicrate')]['refs']['material'][0])]
+    bed_parts = [part('optab skeleton atlas', 'optab_skel_atlas.mesh', atlas, 'optab_skel_COL.xml'),
+                 part('optab skeleton bench', 'optab_skel_bench.mesh', m[by_name(m, 29, 'metal table01')]['refs']['material'][0]),
+                 part('optab skeleton limbs', 'optab_skel_limbs.mesh', m[by_name(m, 29, 'BENCH Robot Limb-pieces')]['refs']['material'][0])]
+    table['refs']['parts'] = [(p['sid'], 0, 100, 0) for p in table_parts]
+    bed['refs']['parts'] = list(m[by_name(m, 0, 'Skeleton Repair Bed')]['refs']['parts']) + [(p['sid'], 0, 100, 0) for p in bed_parts]
+
+    records = [table, bed, surgery, robots] + table_parts + bed_parts
     write(out, records)
+    for p in table_parts + bed_parts:
+        print(p['sid'], p['name'], p['f']['phs or mesh'], p['f']['xml collision'], p['refs']['material'])
     for r in records:
         print(r['sid'], r['name'], {k: [m.get(t[0], {}).get('name', t[0]) for t in v] for k, v in r['refs'].items() if r['type'] == 21},
               {k: r['f'][k] for k in ('level', 'time', 'output rate', 'power output') if k in r['f']})
