@@ -1,0 +1,10 @@
+{
+  "id": "operating-tables",
+  "apiVersion": 2,
+  "version": "0.1.0",
+  "assemblies": [
+    "OperatingTables.dll"
+  ],
+  "entry": "OperatingTables.OperatingTablesMod",
+  "gameVersion": ">=0.20.0"
+}
