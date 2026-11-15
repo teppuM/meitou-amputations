@@ -46,9 +46,9 @@ public sealed class SurgerySystem : ITickSystem, IOrderOwner, ITaskOwner, ITaskH
     public const TaskType Row = (TaskType)1181;
 
     /// <summary>
-    /// The clip the surgeon works in.
+    /// The clip the surgeon works in: the game's "use", standing with both hands at work at waist height (as at a bench).
     /// </summary>
-    public const string Clip = "medic";
+    public const string Clip = "use";
 
     /// <summary>
     /// The two tables' BUILDING records (the mod's data file).
@@ -90,6 +90,12 @@ public sealed class SurgerySystem : ITickSystem, IOrderOwner, ITaskOwner, ITaskH
     /// The world's game constants and body options (for the patient's blood capacity), and the experience rules.
     /// </summary>
     readonly XpService _xp;
+
+    /// <summary>
+    /// Each working surgeon's progress through the current amputation, 0..1, for the progress bar over its head (<see cref="BarPatch"/>). Written in the
+    /// serial step, read by the snapshot's publish.
+    /// </summary>
+    public static readonly System.Collections.Concurrent.ConcurrentDictionary<CharacterId, float> Progress = new();
 
     /// <summary>
     /// The limbs of the order being started (<see cref="IOrderOwner.Start"/> hands them to the task's start, which makes the operation).
@@ -184,6 +190,8 @@ public sealed class SurgerySystem : ITickSystem, IOrderOwner, ITaskOwner, ITaskH
             var bed = world.Fixtures.All
                 .Where(f => f.RecordId is TableRecord or SkeletonBedRecord && Vector3.Distance(f.Position, at) < 200)
                 .MinBy(f => Vector3.Distance(f.Position, at));
+            int tables = world.Fixtures.All.Count(f => f.RecordId is TableRecord or SkeletonBedRecord);
+            Console.WriteLine($"mod       operating-tables: test row: {tables} table fixture(s); nearest to {id} {(bed is null ? "none within 200" : bed.Id)}");
             if (bed is not null) world.Defer(new UseBedOrder([id], bed.Id) { Tick = world.Tick + 1 });
         }
     }
@@ -286,6 +294,7 @@ public sealed class SurgerySystem : ITickSystem, IOrderOwner, ITaskOwner, ITaskH
     {
         var surgeon = table.IdOf(slot);
         _operations.RemoveAll(o => o.Surgeon == surgeon);
+        Progress.TryRemove(surgeon, out _);
         if (table.Cold(slot) is { } c && c.ActionClip == Clip) c.ActionClip = null;
     }
 
@@ -409,6 +418,7 @@ public sealed class SurgerySystem : ITickSystem, IOrderOwner, ITaskOwner, ITaskH
             return;
         }
         op.Time += world.TickSeconds;
+        Progress[op.Surgeon] = Math.Clamp(op.Time / OperateSeconds, 0, 1);
         if (op.Time < OperateSeconds) return;
         op.Time = 0;
 
@@ -451,8 +461,14 @@ public sealed class SurgerySystem : ITickSystem, IOrderOwner, ITaskOwner, ITaskH
         if (botched) share *= BotchMultiplier;
 
         int slot = limb.Template.LimbSlot;
+        // A closed stump, as the game's own starting-health stumps are: flesh 0 with 5 already treated, nothing stunned, worn or splinted.
         limb.Limb = LimbState.Stump;
         limb.Replacement = null;
+        limb.Flesh = 0;
+        limb.Bandage = 5;
+        limb.Stun = 0;
+        limb.Wear = 0;
+        limb.Rig = 0;
         medical.Blood -= share * Capacity(patient);
         table.LimbsChanged.Enqueue((p, slot, true));
         _xp.ToughnessFromLimbLoss(patient.Stats!, patient.Race!);

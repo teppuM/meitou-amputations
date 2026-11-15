@@ -152,8 +152,7 @@ def main(data, out):
     table_parts = [part('optab table atlas', 'optab_table_atlas.mesh', atlas, 'optab_table_COL.xml'),
                    part('optab table crate', 'optab_table_crate.mesh', m[by_name(m, 29, 'medicrate')]['refs']['material'][0])]
     bed_parts = [part('optab skeleton atlas', 'optab_skel_atlas.mesh', atlas, 'optab_skel_COL.xml'),
-                 part('optab skeleton bench', 'optab_skel_bench.mesh', m[by_name(m, 29, 'metal table01')]['refs']['material'][0]),
-                 part('optab skeleton limbs', 'optab_skel_limbs.mesh', m[by_name(m, 29, 'BENCH Robot Limb-pieces')]['refs']['material'][0])]
+                 part('optab skeleton bench', 'optab_skel_bench.mesh', m[by_name(m, 29, 'metal table01')]['refs']['material'][0])]
     table['refs']['parts'] = [(p['sid'], 0, 100, 0) for p in table_parts]
     bed['refs']['parts'] = list(m[by_name(m, 0, 'Skeleton Repair Bed')]['refs']['parts']) + [(p['sid'], 0, 100, 0) for p in bed_parts]
 

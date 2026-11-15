@@ -85,6 +85,17 @@ def rest_on(o, support):
     print('REST', o.name, 'on', support.name, round(best, 2))
 
 
+def clear_of(objs):
+    """Fails when two of objs overlap in plan (their footprints, shrunk by a small margin), so items on a table never clip into each other."""
+    boxes = [(o.name, *bounds(o)) for o in objs]
+    for i in range(len(boxes)):
+        for j in range(i + 1, len(boxes)):
+            (n1, a1, b1), (n2, a2, b2) = boxes[i], boxes[j]
+            if a1.x + 0.1 < b2.x and a2.x + 0.1 < b1.x and a1.y + 0.1 < b2.y and a2.y + 0.1 < b1.y:
+                raise RuntimeError(f'{n1} overlaps {n2}')
+    print('CLEAR', [b[0] for b in boxes])
+
+
 def strap(name, x, top, width, region=(420, 3072 + 150, 505, 3072 + 620)):
     """A leather strap over the mattress: a thin band arched across the table with its ends tucked down the sides (furniture atlas strap strip)."""
     bm = bmesh.new()
@@ -135,12 +146,16 @@ def operating_table():
     tray = piece('buildings/furniture/new_furniture01/small_table1.mesh', ATLAS, at=(19.5, 2.0, 0), rot=(0, 0, 90), name='instrument_table')
     sit_on(tray, 0)
     tt = bounds(tray)[1].z
-    tools = [piece('items/meshes/Item_Hacksaw.mesh', ATLAS, at=(18.8, 0.0, 0), rot=(0, 0, 80)),
-             piece('items/meshes/Item_Tools3.mesh', ATLAS, at=(20.6, 3.6, 0), rot=(0, 0, -30)),
-             piece('items/meshes/Item_Tools.mesh', ATLAS, at=(18.4, 4.4, 0), rot=(0, 0, 15)),
-             piece('items/meshes/Item_Medical_Supplies.mesh', ATLAS, at=(21.0, -0.6, 0), rot=(0, 0, 10)),
-             piece('items/meshes/Item_Advanced_First_Aid_Kit.mesh', ATLAS, at=(20.4, 6.4, 0), rot=(0, 0, 95))]
+    # Laid out on the table's top without touching each other (checked below): the saw along the near edge, the kit and the supplies at the back, the
+    # pliers between them.
+    tlo, thi = bounds(tray)
+    cx, cy = (tlo.x + thi.x) / 2, (tlo.y + thi.y) / 2
+    print('TRAY TOP', [round(v, 1) for v in tlo], [round(v, 1) for v in thi])
+    tools = [piece('items/meshes/Item_Hacksaw.mesh', ATLAS, at=(cx - 2.3, cy, 0), rot=(0, 0, 90)),
+             piece('items/meshes/Item_Advanced_First_Aid_Kit.mesh', ATLAS, at=(cx + 1.7, cy - 2.6, 0), rot=(0, 0, 90)),
+             piece('items/meshes/Item_Medical_Supplies.mesh', ATLAS, at=(cx + 1.7, cy + 3.4, 0), rot=(0, 0, 90))]
     for t in tools: rest_on(t, tray)
+    clear_of(tools)
     bowl = piece('items/meshes/Item_Bowl_Wood.mesh', ATLAS, at=(1.5, 0, 0), scale=1.6, name='blood_bowl'); sit_on(bowl, 0)
     lamp = piece('buildings/lights/strip_light1.mesh', ATLAS, at=(-15.5, -5.5, 0), name='surgery_lamp'); sit_on(lamp, 0)
     crate = piece('buildings/furniture/medicrate.mesh', 'ref/tex/medicrate_d.png', at=(-19.5, 6.5, 0), rot=(0, 0, 90), scale=0.45, name='medical_crate')
@@ -155,13 +170,14 @@ def skeleton_bed(dx):
     bench = piece('buildings/furniture/metaltable01.mesh', 'ref/tex/ATLAS_interior.png', at=(dx - 2.0, 15.5, 0), scale=0.7, name='parts_bench')
     sit_on(bench, 0)
     bt = bounds(bench)[1].z
-    limbs = piece('buildings/crafting/BENCH Robot Limb-pieces.mesh', 'ref/tex/BENCH Robot Limbs_DIF.png', at=(dx - 2.0, 15.5, 0), scale=0.28,
-                  name='limb_pieces')
-    rest_on(limbs, bench)
-    kit = piece('items/meshes/Item_Robot_Repair_Kit.mesh', ATLAS, at=(dx + 6.5, 15.0, 0), rot=(0, 0, 20)); rest_on(kit, bench)
-    grinder = piece('items/meshes/Item_Tools3.mesh', ATLAS, at=(dx - 9.0, 15.8, 0), rot=(0, 0, -60)); rest_on(grinder, bench)
-    wrench = piece('items/meshes/Item_Tools2.mesh', ATLAS, at=(dx - 5.5, 14.2, 0), rot=(0, 0, 10)); rest_on(wrench, bench)
-    return [base, tank, pipe, bench, limbs, kit, grinder, wrench]
+    blo, bhi = bounds(bench)
+    bx, by_ = (blo.x + bhi.x) / 2, (blo.y + bhi.y) / 2
+    print('BENCH TOP', [round(v, 1) for v in blo], [round(v, 1) for v in bhi])
+    kit = piece('items/meshes/Item_Robot_Repair_Kit.mesh', ATLAS, at=(bx + 7.0, by_, 0), rot=(0, 0, 0)); rest_on(kit, bench)
+    grinder = piece('items/meshes/Item_Tools3.mesh', ATLAS, at=(bx - 8.5, by_, 0), rot=(0, 0, 0)); rest_on(grinder, bench)
+    wrench = piece('items/meshes/Item_Tools2.mesh', ATLAS, at=(bx - 0.5, by_, 0), rot=(0, 0, 0)); rest_on(wrench, bench)
+    clear_of([kit, grinder, wrench])
+    return [base, tank, pipe, bench, kit, grinder, wrench]
 
 
 HUM = 'E:/Claude/Kenshi/tools/clothing-test/cache/hum/'
@@ -310,7 +326,6 @@ if EXPORT:
     s_atlas = [by2[n] for n in ('oil_drum', 'oil_pipe')] + [o for o in skel if o.name.startswith('Item_')]
     export_mesh(join('optab_skel_atlas', s_atlas, 55), 'optab_skel_atlas.mesh')
     export_mesh(join('optab_skel_bench', [by2['parts_bench']], 55), 'optab_skel_bench.mesh')
-    export_mesh(join('optab_skel_limbs', [by2['limb_pieces']], 55), 'optab_skel_limbs.mesh')
     for k, v in report.items(): print('EXPORT', k, v)
     json.dump(report, open(os.path.join(DIST, 'export_report.json'), 'w'), indent=1)
 
