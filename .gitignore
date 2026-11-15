@@ -5,3 +5,4 @@ FEATURES.md
 models/ref/*.png
 models/draft/*.blend*
 models/draft/*.png
+__pycache__/
