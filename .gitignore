@@ -6,3 +6,6 @@ models/ref/*.png
 models/draft/*.blend*
 models/draft/*.png
 __pycache__/
+models/draft2/*.png
+models/draft2/*.blend*
+models/gallery/

@@ -1,0 +1,221 @@
+{
+ "cabinet1": {
+  "mesh": "data/buildings/furniture/new_furniture01/cabinet1.mesh",
+  "tex": "data/buildings/materials/props_atlas_regular_diffuse.dds",
+  "part": "cabinet1_part",
+  "type": 29,
+  "png": "ref/tex/props_atlas_regular_diffuse.png"
+ },
+ "prisoner_pole": {
+  "mesh": "data/buildings/furniture/new_furniture01/prisoner_pole.mesh",
+  "tex": "data/buildings/materials/props_atlas_regular_diffuse.dds",
+  "part": "prisoner_pole_part",
+  "type": 29,
+  "png": "ref/tex/props_atlas_regular_diffuse.png"
+ },
+ "CannibalCamp Butchery Table04": {
+  "mesh": "data/buildings/Cannibal_Camp/CannibalCamp Butchery Table04.mesh",
+  "tex": null,
+  "part": "CannibalCamp Butchery Table04",
+  "type": 29
+ },
+ "Bench tanning leather": {
+  "mesh": "data/buildings/crafting/Bench tanning leather.mesh",
+  "tex": "data/buildings/crafting/textures/chainleathermachinebench_atlas_HI.dds",
+  "part": "smithy leather fabrication",
+  "type": 29,
+  "png": "ref/tex/chainleathermachinebench_atlas_HI.png"
+ },
+ "CannibalCamp Butchery Table01": {
+  "mesh": "data/buildings/Cannibal_Camp/CannibalCamp Butchery Table01.mesh",
+  "tex": null,
+  "part": "CannibalCamp Butchery Table01",
+  "type": 29
+ },
+ "boiler_tank1": {
+  "mesh": "data/buildings/furniture/new_furniture01/boiler_tank1.mesh",
+  "tex": "data/buildings/materials/props_atlas_regular_diffuse.dds",
+  "part": "boiler_tank1_part",
+  "type": 29,
+  "png": "ref/tex/props_atlas_regular_diffuse.png"
+ },
+ "medicrate": {
+  "mesh": "data/buildings/furniture/medicrate.mesh",
+  "tex": "data/buildings/furniture/materials/medicrate_d.dds",
+  "part": "medicrate",
+  "type": 29,
+  "png": "ref/tex/medicrate_d.png"
+ },
+ "smithy_chain": {
+  "mesh": "data/buildings/crafting/smithy_chain.mesh",
+  "tex": "data/buildings/crafting/textures/Smithy_Bench_D.dds",
+  "part": "smithy chain fabrication",
+  "type": 29,
+  "png": "ref/tex/Smithy_Bench_D.png"
+ },
+ "CannibalCamp Butchery Table03": {
+  "mesh": "data/buildings/Cannibal_Camp/CannibalCamp Butchery Table03.mesh",
+  "tex": null,
+  "part": "CannibalCamp Butchery Table03",
+  "type": 29
+ },
+ "CannibalCamp Butchery Table02": {
+  "mesh": "data/buildings/Cannibal_Camp/CannibalCamp Butchery Table02.mesh",
+  "tex": null,
+  "part": "CannibalCamp Butchery Table02",
+  "type": 29
+ },
+ "metaltable01": {
+  "mesh": "data/buildings/furniture/metaltable01.mesh",
+  "tex": "data/buildings/materials/ATLAS_interior.dds",
+  "part": "metal table01",
+  "type": 29,
+  "png": "ref/tex/ATLAS_interior.png"
+ },
+ "signboard2 tools": {
+  "mesh": "data/buildings/misc/signboard2 tools.mesh",
+  "tex": "data/buildings/materials/signs_diffuse.dds",
+  "part": "sign3",
+  "type": 29,
+  "png": "ref/tex/signs_diffuse.png"
+ },
+ "strip_light1": {
+  "mesh": "data/buildings/lights/strip_light1.mesh",
+  "tex": "data/buildings/materials/props_atlas_regular_diffuse.dds",
+  "part": "strip_light1_part",
+  "type": 29,
+  "png": "ref/tex/props_atlas_regular_diffuse.png"
+ },
+ "Indoor_Gas-Lamp": {
+  "mesh": "data/buildings/lights/Indoor_Gas-Lamp.mesh",
+  "tex": "data/buildings/materials/Indoor_GasLamp_DIF.dds",
+  "part": "indoor_Gas-Lamp",
+  "type": 29,
+  "png": "ref/tex/Indoor_GasLamp_DIF.png"
+ },
+ "Machine Bench": {
+  "mesh": "data/buildings/crafting/Machine Bench.mesh",
+  "tex": "data/buildings/crafting/textures/Bench Machinery_Diff_HI.dds",
+  "part": "Machine Bench",
+  "type": 29,
+  "png": "ref/tex/Bench Machinery_Diff_HI.png"
+ },
+ "Robotics Bench": {
+  "mesh": "data/buildings/crafting/Robotics Bench.mesh",
+  "tex": "data/buildings/crafting/textures/Robotic_Bench_diffuse_HI.dds",
+  "part": "Robotics Bench",
+  "type": 29,
+  "png": "ref/tex/Robotic_Bench_diffuse_HI.png"
+ },
+ "Old-World_Flouresc-Light": {
+  "mesh": "data/buildings/lights/Old-World_Flouresc-Light.mesh",
+  "tex": null,
+  "part": "Old-World_Flouresc-Light",
+  "type": 29
+ },
+ "Ceiling Fan Lamp_BULB": {
+  "mesh": "data/buildings/lights/Ceiling Fan Lamp_BULB.mesh",
+  "tex": "data/buildings/materials/props_atlas_regular_diffuse.dds",
+  "part": "Ceiling Fan Lamp_BULB",
+  "type": 29,
+  "png": "ref/tex/props_atlas_regular_diffuse.png"
+ },
+ "BENCH Robot Limbs": {
+  "mesh": "data/buildings/crafting/BENCH Robot Limbs.mesh",
+  "tex": "data/buildings/crafting/textures/Robotic_Bench_diffuse_HI.dds",
+  "part": "BENCH Robot Limb",
+  "type": 29,
+  "png": "ref/tex/Robotic_Bench_diffuse_HI.png"
+ },
+ "BENCH Robot Limb-pieces": {
+  "mesh": "data/buildings/crafting/BENCH Robot Limb-pieces.mesh",
+  "tex": "data/buildings/crafting/textures/BENCH Robot Limbs_DIF.dds",
+  "part": "BENCH Robot Limb-pieces",
+  "type": 29,
+  "png": "ref/tex/BENCH Robot Limbs_DIF.png"
+ },
+ "Peeler Machine": {
+  "mesh": "data/buildings/furniture/new_furniture01/Peeler Machine.mesh",
+  "tex": "data/buildings/furniture/materials/Peeler_DIF_HI.dds",
+  "part": "Peeler Machine",
+  "type": 29,
+  "png": "ref/tex/Peeler_DIF_HI.png"
+ },
+ "Peeler-Blade stack 01": {
+  "mesh": "data/buildings/furniture/new_furniture01/Peeler-Blade stack 01.mesh",
+  "tex": "data/buildings/furniture/materials/Peeler_DIF_HI.dds",
+  "part": "Peeler Machine Blade-stack01",
+  "type": 29,
+  "png": "ref/tex/Peeler_DIF_HI.png"
+ },
+ "ITEM Item_Hacksaw": {
+  "mesh": "data/items/meshes/Item_Hacksaw.mesh",
+  "tex": "data/buildings/materials/grandmisc.dds",
+  "png": "ref/tex/grandmisc.png",
+  "part": "Item_Hacksaw",
+  "type": 4
+ },
+ "ITEM Item_Tools": {
+  "mesh": "data/items/meshes/Item_Tools.mesh",
+  "tex": "data/buildings/materials/grandmisc.dds",
+  "png": "ref/tex/grandmisc.png",
+  "part": "Item_Tools",
+  "type": 4
+ },
+ "ITEM Item_Tools2": {
+  "mesh": "data/items/meshes/Item_Tools2.mesh",
+  "tex": "data/buildings/materials/grandmisc.dds",
+  "png": "ref/tex/grandmisc.png",
+  "part": "Item_Tools2",
+  "type": 4
+ },
+ "ITEM Item_Tools3": {
+  "mesh": "data/items/meshes/Item_Tools3.mesh",
+  "tex": "data/buildings/materials/grandmisc.dds",
+  "png": "ref/tex/grandmisc.png",
+  "part": "Item_Tools3",
+  "type": 4
+ },
+ "ITEM Item_Medical_Supplies": {
+  "mesh": "data/items/meshes/Item_Medical_Supplies.mesh",
+  "tex": "data/buildings/materials/grandmisc.dds",
+  "png": "ref/tex/grandmisc.png",
+  "part": "Item_Medical_Supplies",
+  "type": 4
+ },
+ "ITEM Item_Advanced_First_Aid_Kit": {
+  "mesh": "data/items/meshes/Item_Advanced_First_Aid_Kit.mesh",
+  "tex": "data/buildings/materials/grandmisc.dds",
+  "png": "ref/tex/grandmisc.png",
+  "part": "Item_Advanced_First_Aid_Kit",
+  "type": 4
+ },
+ "ITEM Item_Basic_First_Aid_Kit": {
+  "mesh": "data/items/meshes/Item_Basic_First_Aid_Kit.mesh",
+  "tex": "data/buildings/materials/grandmisc.dds",
+  "png": "ref/tex/grandmisc.png",
+  "part": "Item_Basic_First_Aid_Kit",
+  "type": 4
+ },
+ "ITEM Item_Bowl_Wood": {
+  "mesh": "data/items/meshes/Item_Bowl_Wood.mesh",
+  "tex": "data/buildings/materials/grandmisc.dds",
+  "png": "ref/tex/grandmisc.png",
+  "part": "Item_Bowl_Wood",
+  "type": 4
+ },
+ "ITEM Item_Robot_Repair_Kit": {
+  "mesh": "data/items/meshes/Item_Robot_Repair_Kit.mesh",
+  "tex": "data/buildings/materials/grandmisc.dds",
+  "png": "ref/tex/grandmisc.png",
+  "part": "Item_Robot_Repair_Kit",
+  "type": 4
+ },
+ "ITEM medkit": {
+  "mesh": "data/items/misc/medkit.mesh",
+  "tex": "data/buildings/materials/grandmisc.dds",
+  "png": "ref/tex/grandmisc.png",
+  "part": "medkit",
+  "type": 4
+ }
+}
