@@ -9,3 +9,4 @@ __pycache__/
 models/draft2/*.png
 models/draft2/*.blend*
 models/gallery/
+.claude/
