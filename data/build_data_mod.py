@@ -118,10 +118,10 @@ def main(data, out):
     table_sid, bed_sid, surgery_sid, robots_sid = (f'{n}-{FILE}' for n in range(1, 5))
 
     table = copy(m, by_name(m, 0, 'Bed'), table_sid, 'Operating Table', Description=(
-        'A table for surgery. Lie a patient on it, then right-click them with your surgeon selected and choose Surgery... to remove limbs. '
+        'A table for surgery. Lie a patient on it, then right-click them with your surgeon selected and choose Amputate... to remove limbs. '
         "The surgeon's First Aid decides how much blood the patient loses and how often it goes wrong. Also heals like a bed."))
     bed = copy(m, by_name(m, 0, 'Skeleton Repair Bed'), bed_sid, 'Skeleton Operating Bed', Description=(
-        'A repair bed for skeleton surgery. Lie a skeleton on it, then right-click them with your surgeon selected and choose Surgery... to remove '
+        'A repair bed for skeleton surgery. Lie a skeleton on it, then right-click them with your surgeon selected and choose Amputate... to remove '
         "limbs. The surgeon's Robotics decides how much oil the skeleton loses and how often it goes wrong. Repairs faster than a Skeleton Repair Bed."))
     bed['f']['output rate'] = 10.0
     bed['f']['power output'] = 0  # needs no generator: a machine that draws nothing always counts as powered

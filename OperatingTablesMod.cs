@@ -4,7 +4,7 @@ using Meitou.Simulation;
 namespace OperatingTables;
 
 /// <summary>
-/// The mod's entry: registers the operations, the "Surgery..." right-click row and its menu. The Operating Table, the Skeleton Operating Bed and
+/// The mod's entry: registers the operations, the "Amputate..." right-click row and its menu. The Operating Table, the Skeleton Operating Bed and
 /// their research come from the mod's data file (OperatingTables.mod).
 /// </summary>
 public sealed class OperatingTablesMod : IMod

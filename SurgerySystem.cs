@@ -95,7 +95,7 @@ public sealed class SurgerySystem : ITickSystem, IOrderOwner, ITaskOwner, ITaskH
     /// The caption of the bar over a working surgeon (the game's task bar hook, <c>CharacterCold.ModTaskBar</c>), its fill the progress through
     /// the current amputation.
     /// </summary>
-    const string BarCaption = "Surgery";
+    const string BarCaption = "Amputating";
 
     /// <summary>
     /// The player's characters lying on one of the mod's tables (either kind), for the right-click row, which runs on the interface's thread and

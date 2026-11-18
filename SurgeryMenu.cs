@@ -5,7 +5,7 @@ using Meitou.Simulation;
 namespace OperatingTables;
 
 /// <summary>
-/// The "Surgery..." row and its menu. The row goes on the right-click menu of the player's own character lying on an Operating Table or a Skeleton
+/// The "Amputate..." row and its menu. The row goes on the right-click menu of the player's own character lying on an Operating Table or a Skeleton
 /// Operating Bed while another character is selected (the game's right-click row hook, <c>AddCharacterMenuVerbs</c>). It opens the mod's menu in
 /// its place, drawn as the game draws its right-click menu, in the HUD's overlay slot: the patient's name, then Left Arm, Right Arm, Left Leg, Right
 /// Leg (one limb per operation). A row whose limb is gone (stumps or prosthetics) has grey text and cannot be clicked; a click elsewhere closes the
@@ -18,7 +18,7 @@ sealed class SurgeryMenu : IUiExtension
     /// <summary>
     /// The row's caption.
     /// </summary>
-    public const string Caption = "Surgery...";
+    public const string Caption = "Amputate...";
 
     /// <summary>
     /// No rows: the plain right click stays.
