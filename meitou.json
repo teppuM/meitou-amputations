@@ -6,5 +6,5 @@
     "OperatingTables.dll"
   ],
   "entry": "OperatingTables.OperatingTablesMod",
-  "gameVersion": ">=0.21.0"
+  "gameVersion": ">=0.22.1"
 }
