@@ -46,9 +46,10 @@ public sealed class SurgerySystem : ITickSystem, IOrderOwner, ITaskOwner, ITaskH
     public const TaskType Row = (TaskType)1181;
 
     /// <summary>
-    /// The clip the surgeon works in: the game's "use", standing with both hands at work at waist height (as at a bench).
+    /// The clip the surgeon works in: the game's ANIMATION record "generic use" (its file's clip is "use"), standing with both hands at work at
+    /// waist height (as at a bench). The game finds a clip by its record's name, not the file's.
     /// </summary>
-    public const string Clip = "use";
+    public const string Clip = "generic use";
 
     /// <summary>
     /// The two tables' BUILDING records (the mod's data file).
