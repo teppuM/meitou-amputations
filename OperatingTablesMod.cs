@@ -15,7 +15,6 @@ public sealed class OperatingTablesMod : IMod
     public void Initialize(ModContext context)
     {
         context.AddSystem("surgery", SurgerySystem.Create, SystemAnchor.End);
-        BarPatch.Apply(context);
         context.AddUi(new SurgeryMenu());
         context.AddDebugCommand("Operating Tables: first selected operates on the second (limb 1, 2, 4 or 8)", Operate, hasField: true);
         context.AddDebugCommand("Operating Tables: selected lie on the nearest table", d =>

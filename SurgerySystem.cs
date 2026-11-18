@@ -92,10 +92,10 @@ public sealed class SurgerySystem : ITickSystem, IOrderOwner, ITaskOwner, ITaskH
     readonly XpService _xp;
 
     /// <summary>
-    /// Each working surgeon's progress through the current amputation, 0..1, for the progress bar over its head (<see cref="BarPatch"/>). Written in the
-    /// serial step, read by the snapshot's publish.
+    /// The caption of the bar over a working surgeon (the game's task bar hook, <c>CharacterCold.ModTaskBar</c>), its fill the progress through
+    /// the current amputation.
     /// </summary>
-    public static readonly System.Collections.Concurrent.ConcurrentDictionary<CharacterId, float> Progress = new();
+    const string BarCaption = "Surgery";
 
     /// <summary>
     /// The player's characters lying on one of the mod's tables (either kind), for the right-click row, which runs on the interface's thread and
@@ -305,8 +305,9 @@ public sealed class SurgerySystem : ITickSystem, IOrderOwner, ITaskOwner, ITaskH
     {
         var surgeon = table.IdOf(slot);
         _operations.RemoveAll(o => o.Surgeon == surgeon);
-        Progress.TryRemove(surgeon, out _);
-        if (table.Cold(slot) is { } c && c.ActionClip == Clip) c.ActionClip = null;
+        if (table.Cold(slot) is not { } c) return;
+        if (c.ActionClip == Clip) c.ActionClip = null;
+        if (c.ModTaskBar is { Text: BarCaption }) c.ModTaskBar = null;
     }
 
     /// <summary>
@@ -445,7 +446,7 @@ public sealed class SurgerySystem : ITickSystem, IOrderOwner, ITaskOwner, ITaskH
             return;
         }
         op.Time += world.TickSeconds;
-        Progress[op.Surgeon] = Math.Clamp(op.Time / OperateSeconds, 0, 1);
+        table.Cold(s)!.ModTaskBar = new TaskBar(BarCaption, Math.Clamp(op.Time / OperateSeconds, 0, 1));
         if (op.Time < OperateSeconds) return;
         op.Time = 0;
 
