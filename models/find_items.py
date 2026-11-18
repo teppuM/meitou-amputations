@@ -1,9 +1,9 @@
 import importlib.util, json, os
 from PIL import Image
 BS = chr(92)
-spec = importlib.util.spec_from_file_location('b', 'E:/Claude/Kenshi/mods/OperatingTables/data/build_data_mod.py'); b = importlib.util.module_from_spec(spec); spec.loader.exec_module(b)
+spec = importlib.util.spec_from_file_location('b', 'E:/Claude/Kenshi/mod-builder/operating-tables/data/build_data_mod.py'); b = importlib.util.module_from_spec(spec); spec.loader.exec_module(b)
 m = b.merged('E:/SteamLibrary/steamapps/common/Kenshi/data')
-W = 'E:/Claude/Kenshi/mods/OperatingTables/models/'
+W = 'E:/Claude/Kenshi/mod-builder/operating-tables/models/'
 K = 'E:/SteamLibrary/steamapps/common/Kenshi/'
 names = ['Item_Hacksaw', 'Item_Tools', 'Item_Tools2', 'Item_Tools3', 'Item_Medical_Supplies', 'Item_Advanced_First_Aid_Kit', 'Item_Basic_First_Aid_Kit',
          'Item_Bowl_Wood', 'Item_Bowl_Ceramic', 'Item_Robot_Repair_Kit', 'medkit', 'Item_Advanced_Splint']

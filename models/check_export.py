@@ -2,8 +2,8 @@
 import bpy, math, addon_utils, xml.dom.minidom
 addon_utils.enable('bl_ext.user_default.kenshi_io_tools', default_set=True)
 IMP = getattr(bpy.ops, 'import')
-D = 'E:/Claude/Kenshi/mods/OperatingTables/dist/'
-W = 'E:/Claude/Kenshi/mods/OperatingTables/models/'
+D = 'E:/Claude/Kenshi/mod-builder/operating-tables/dist/'
+W = 'E:/Claude/Kenshi/mod-builder/operating-tables/models/'
 K = 'E:/SteamLibrary/steamapps/common/Kenshi/data/buildings/furniture/new_furniture01/'
 for o in list(bpy.data.objects): bpy.data.objects.remove(o)
 def load(path, png, dx=0):

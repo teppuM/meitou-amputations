@@ -3,7 +3,7 @@ import bpy, math, json, addon_utils
 from mathutils import Vector
 addon_utils.enable('bl_ext.user_default.kenshi_io_tools', default_set=True)
 IMP = getattr(bpy.ops, 'import')
-W = 'E:/Claude/Kenshi/mods/OperatingTables/models/'
+W = 'E:/Claude/Kenshi/mod-builder/operating-tables/models/'
 K = 'E:/SteamLibrary/steamapps/common/Kenshi/'
 c = json.load(open(W + 'ref/candidates_items.json'))
 sc = bpy.context.scene

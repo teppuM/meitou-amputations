@@ -21,4 +21,4 @@ for frac in (0.3, 0.7):
     print('PELVIS', frac, [round(x, 1) for x in pel])
     a = math.radians(35); e = math.radians(30); r = 80
     co.location = (pel.x + r*math.sin(a)*math.cos(e), pel.y - r*math.cos(a)*math.cos(e), pel.z + r*math.sin(e)); co.rotation_euler = (math.radians(90)-e, 0, a)
-    sc.render.filepath = f'E:/Claude/Kenshi/mods/OperatingTables/models/draft/clip_{CLIP.replace(' ','_')}_{int(frac*100)}.png'; bpy.ops.render.render(write_still=True)
+    sc.render.filepath = f'E:/Claude/Kenshi/mod-builder/operating-tables/models/draft/clip_{CLIP.replace(' ','_')}_{int(frac*100)}.png'; bpy.ops.render.render(write_still=True)

@@ -10,7 +10,7 @@ from mathutils import Vector
 addon_utils.enable('bl_ext.user_default.kenshi_io_tools', default_set=True)
 IMP = getattr(bpy.ops, 'import')
 K = 'E:/SteamLibrary/steamapps/common/Kenshi/data/'
-W = 'E:/Claude/Kenshi/mods/OperatingTables/models/'
+W = 'E:/Claude/Kenshi/mod-builder/operating-tables/models/'
 for o in list(bpy.data.objects): bpy.data.objects.remove(o)
 
 RAISE = 1.3          # the Bed's frame height times this: top at about 8 units (80 cm)

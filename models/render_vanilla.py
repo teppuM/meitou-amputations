@@ -3,7 +3,7 @@ import bpy, math, addon_utils
 addon_utils.enable('bl_ext.user_default.kenshi_io_tools', default_set=True)
 IMP = getattr(bpy.ops, 'import')
 K = 'E:/SteamLibrary/steamapps/common/Kenshi/data/buildings/furniture/new_furniture01/'
-W = 'E:/Claude/Kenshi/mods/OperatingTables/models/'
+W = 'E:/Claude/Kenshi/mod-builder/operating-tables/models/'
 for o in list(bpy.data.objects): bpy.data.objects.remove(o)
 def load(name, tex, dx):
     before = set(bpy.data.objects)

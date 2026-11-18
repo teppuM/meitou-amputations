@@ -11,7 +11,7 @@ from mathutils import Vector
 addon_utils.enable('bl_ext.user_default.kenshi_io_tools', default_set=True)
 IMP = getattr(bpy.ops, 'import')
 K = 'E:/SteamLibrary/steamapps/common/Kenshi/data/'
-W = 'E:/Claude/Kenshi/mods/OperatingTables/models/'
+W = 'E:/Claude/Kenshi/mod-builder/operating-tables/models/'
 OUT = W + 'draft2/'
 os.makedirs(OUT, exist_ok=True)
 for o in list(bpy.data.objects): bpy.data.objects.remove(o)
