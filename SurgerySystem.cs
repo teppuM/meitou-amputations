@@ -98,6 +98,17 @@ public sealed class SurgerySystem : ITickSystem, IOrderOwner, ITaskOwner, ITaskH
     public static readonly System.Collections.Concurrent.ConcurrentDictionary<CharacterId, float> Progress = new();
 
     /// <summary>
+    /// The player's characters lying on one of the mod's tables (either kind), for the right-click row, which runs on the interface's thread and
+    /// may not read the world. Replaced whole every <see cref="PublishEvery"/> ticks in the serial step.
+    /// </summary>
+    public static volatile IReadOnlySet<CharacterId> OnTables = new HashSet<CharacterId>();
+
+    /// <summary>
+    /// How often, in ticks, <see cref="OnTables"/> is refreshed (a second's thirtieth each; half a second is quick enough for a menu).
+    /// </summary>
+    const int PublishEvery = 15;
+
+    /// <summary>
     /// The limbs of the order being started (<see cref="IOrderOwner.Start"/> hands them to the task's start, which makes the operation).
     /// </summary>
     int _startLimbs;
@@ -323,6 +334,22 @@ public sealed class SurgerySystem : ITickSystem, IOrderOwner, ITaskOwner, ITaskH
             if (k >= _operations.Count) continue;
             Step(world, _operations[k]);
         }
+        if (world.Tick % PublishEvery == 0) Publish(world);
+    }
+
+    /// <summary>
+    /// Refreshes <see cref="OnTables"/>: every living player character in a bed whose record is one of the mod's tables. Reads only.
+    /// </summary>
+    static void Publish(World world)
+    {
+        var table = world.Characters;
+        var on = new HashSet<CharacterId>();
+        for (int slot = 0; slot < table.HighWater; slot++)
+        {
+            if (table.Cold(slot) is not { IsPlayer: true, InSomething: HeldState.Bed, InWhat: { } bedId, Medical.Dead: false }) continue;
+            if (world.Fixtures.Find(bedId)?.RecordId is TableRecord or SkeletonBedRecord) on.Add(table.IdOf(slot));
+        }
+        if (!on.SetEquals(OnTables)) OnTables = on;
     }
 
     /// <summary>

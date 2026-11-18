@@ -1,18 +1,15 @@
 using System.Numerics;
-using System.Reflection;
-using HarmonyLib;
 using Meitou.Game.Ui;
-using Meitou.Modding;
 using Meitou.Simulation;
 
 namespace OperatingTables;
 
 /// <summary>
 /// The "Surgery..." row and its menu. The row goes on the right-click menu of the player's own character lying on an Operating Table or a Skeleton
-/// Operating Bed while another character is selected (a postfix on <c>Meitou.Game.Ui.ContextMenuWindow.Verbs</c>, internal, found by name). It opens
-/// the mod's menu in its place, drawn as the game draws its right-click menu, in the HUD's overlay slot: the patient's name, then Left Arm, Right Arm,
-/// Left Leg, Right Leg (one limb per operation). A row whose limb is gone (stumps or prosthetics) has grey text and cannot be clicked;
-/// a click elsewhere closes the menu. A row gives the nearest selected character other than the patient the operation.
+/// Operating Bed while another character is selected (the game's right-click row hook, <c>AddCharacterMenuVerbs</c>). It opens the mod's menu in
+/// its place, drawn as the game draws its right-click menu, in the HUD's overlay slot: the patient's name, then Left Arm, Right Arm, Left Leg, Right
+/// Leg (one limb per operation). A row whose limb is gone (stumps or prosthetics) has grey text and cannot be clicked; a click elsewhere closes the
+/// menu. A row gives the first selected character other than the patient the operation.
 /// </summary>
 sealed class SurgeryMenu : IUiExtension
 {
@@ -24,70 +21,21 @@ sealed class SurgeryMenu : IUiExtension
     public const string Caption = "Surgery...";
 
     /// <summary>
-    /// The right-click menu's player interface field (a captured primary-constructor parameter, so found by type), its selection read, its cursor
-    /// and its session (for the world's beds).
+    /// No rows: the plain right click stays.
     /// </summary>
-    static FieldInfo? s_player, s_mouse, s_session;
+    static readonly UiMenuVerb[] None = [];
 
     /// <summary>
-    /// The player interface's selection read, <c>SelectedIds()</c>.
+    /// The row, for the player's own living character lying on one of the mod's tables (as the surgery system last published), while a character
+    /// other than it is selected. Runs whenever the game asks for the menu, so it only reads the snapshot and the published set.
     /// </summary>
-    static MethodInfo? s_selectedIds;
-
-    /// <summary>
-    /// The session's <c>CurrentSnapshot</c>.
-    /// </summary>
-    static PropertyInfo? s_snapshot;
-
-    /// <summary>
-    /// How near a bed's spot a character lying in it is, at most.
-    /// </summary>
-    const float BedNear = 40;
-
-    /// <summary>
-    /// Patches the right-click menu's verb list; a missing member is logged and leaves the menu alone.
-    /// </summary>
-    public static void Apply(ModContext context)
+    static IEnumerable<UiMenuVerb> Verbs(UiMenuContext context)
     {
-        var window = AccessTools.TypeByName("Meitou.Game.Ui.ContextMenuWindow");
-        var verbs = window is null ? null : AccessTools.Method(window, "Verbs", [typeof(CharacterSnapshot)]);
-        s_player = window?.GetFields(BindingFlags.Instance | BindingFlags.NonPublic).FirstOrDefault(f => f.FieldType.Name == "PlayerInterface");
-        s_selectedIds = s_player is null ? null : AccessTools.Method(s_player.FieldType, "SelectedIds");
-        s_mouse = s_player is null ? null : AccessTools.Field(s_player.FieldType, "Mouse");
-        s_session = s_player is null ? null : AccessTools.Field(s_player.FieldType, "Session");
-        s_snapshot = s_session is null ? null : AccessTools.Property(s_session.FieldType, "CurrentSnapshot");
-        if (verbs is null || s_selectedIds is null || s_snapshot is null)
-        {
-            context.LogError("the right-click menu was not found: no Surgery row (the game changed; rebuild the mod)");
-            return;
-        }
+        var target = context.Target;
+        if (!target.IsPlayer || !target.InBed || target.Body is { Dead: true } || !SurgerySystem.OnTables.Contains(target.Id)) return None;
+        if (!context.Selected.Any(id => id != target.Id)) return None;
 
-        context.Harmony.Patch(verbs, postfix: new HarmonyMethod(typeof(SurgeryMenu), nameof(Postfix)));
-    }
-
-    /// <summary>
-    /// Adds the row to the player's own character lying on one of the mod's tables, while a character other than it is selected.
-    /// </summary>
-    static void Postfix(object __instance, CharacterSnapshot target, List<(string, Action)> __result)
-    {
-        if (!target.IsPlayer || !target.InBed || target.Body is { Dead: true }) return;
-        var player = s_player?.GetValue(__instance);
-        if (player is null || s_selectedIds?.Invoke(player, null) is not IReadOnlyList<CharacterId> selection) return;
-        if (!selection.Any(id => id != target.Id) || !OnTable(player, target)) return;
-
-        var at = s_mouse?.GetValue(player) is Vector2 mouse ? mouse : default;
-        __result.Add((Caption, () => Show([.. selection.Where(id => id != target.Id)], target, at)));
-    }
-
-    /// <summary>
-    /// Whether <paramref name="target"/> lies on one of the mod's tables: the nearest bed spot to it is one.
-    /// </summary>
-    static bool OnTable(object player, CharacterSnapshot target)
-    {
-        if (s_session?.GetValue(player) is not { } session || s_snapshot?.GetValue(session) is not WorldSnapshot snapshot) return false;
-        var bed = snapshot.Beds.MinBy(b => Vector3.DistanceSquared(b.Position, target.Position));
-        return bed is not null && Vector3.Distance(bed.Position, target.Position) <= BedNear
-            && bed.Record is SurgerySystem.TableRecord or SurgerySystem.SkeletonBedRecord;
+        return [new UiMenuVerb(Caption, () => Show([.. context.Selected.Where(id => id != target.Id)], target, context))];
     }
 
     #endregion
@@ -111,8 +59,7 @@ sealed class SurgeryMenu : IUiExtension
     /// An open menu: the surgeons to choose from, the patient, its name, the limbs it still has (bits as in <see cref="Rows"/>), and where the
     /// right-click menu was.
     /// </summary>
-    sealed record Open(IReadOnlyList<CharacterId> Surgeons, CharacterId Patient, string Title, int Present, Vector2 At, Vector3 PatientAt,
-        IReadOnlyList<Vector3> SurgeonsAt);
+    sealed record Open(IReadOnlyList<CharacterId> Surgeons, CharacterId Patient, string Title, int Present, Vector2 At, UiMenuContext Menu);
 
     /// <summary>
     /// The open menu, null when closed. Set and read on the interface's thread.
@@ -125,10 +72,10 @@ sealed class SurgeryMenu : IUiExtension
     public string Id => "operating-tables";
 
     /// <summary>
-    /// Opens the menu for <paramref name="patient"/> in place of the right-click menu that was at <paramref name="at"/>.
+    /// Opens the menu for <paramref name="patient"/> in place of the right-click menu <paramref name="menu"/> was built for (at its cursor).
     /// </summary>
-    static void Show(IReadOnlyList<CharacterId> surgeons, CharacterSnapshot patient, Vector2 at) =>
-        s_open = new(surgeons, patient.Id, patient.Name, Present(patient.LimbBits), at, patient.Position, []);
+    static void Show(IReadOnlyList<CharacterId> surgeons, CharacterSnapshot patient, UiMenuContext menu) =>
+        s_open = new(surgeons, patient.Id, patient.Name, Present(patient.LimbBits), menu.Cursor, menu);
 
     /// <summary>
     /// The limbs that can still be cut off: each limb slot whose state (2 bits of <paramref name="limbBits"/>) is the original (0) or crushed (3),
@@ -143,10 +90,11 @@ sealed class SurgeryMenu : IUiExtension
     }
 
     /// <summary>
-    /// Registers the styles, the two actions (a row picked, a click outside) and the menu's contribution to the overlay.
+    /// Registers the right-click row, the styles, the two actions (a row picked, a click outside) and the menu's contribution to the overlay.
     /// </summary>
     public void Register(UiRegistration registration)
     {
+        registration.AddCharacterMenuVerbs(Verbs);
         string panel = registration.RegisterStyle("panel", new UiStyle
         {
             Skin = "Kenshi_FloatingPanelSkin", Background = new(0.1f, 0.09f, 0.08f, 0.94f), Text = Ink,
@@ -216,9 +164,8 @@ sealed class SurgeryMenu : IUiExtension
         var open = s_open;
         s_open = null;
         if (open is null || !int.TryParse(argument, out int i) || i < 0 || i >= Rows.Length || open.Surgeons.Count == 0) return;
-        if (OperatingTablesMod.Context is not { } context) return;
 
-        context.Enqueue(new SurgeryOrder(open.Surgeons[0], open.Patient) { Tick = context.Tick, Limbs = Rows[i].Limbs });
+        open.Menu.Enqueue(new SurgeryOrder(open.Surgeons[0], open.Patient) { Tick = open.Menu.Tick, Limbs = Rows[i].Limbs });
     }
 
     #endregion

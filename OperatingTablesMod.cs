@@ -10,18 +10,11 @@ namespace OperatingTables;
 public sealed class OperatingTablesMod : IMod
 {
     /// <summary>
-    /// The mod's context, kept for the menu to queue its orders.
-    /// </summary>
-    internal static ModContext? Context { get; private set; }
-
-    /// <summary>
     /// Registers the operation system (after every standard system), the menu row and the menu.
     /// </summary>
     public void Initialize(ModContext context)
     {
-        Context = context;
         context.AddSystem("surgery", SurgerySystem.Create, SystemAnchor.End);
-        SurgeryMenu.Apply(context);
         BarPatch.Apply(context);
         context.AddUi(new SurgeryMenu());
         context.AddDebugCommand("Operating Tables: first selected operates on the second (limb 1, 2, 4 or 8)", Operate, hasField: true);
