@@ -11,3 +11,4 @@ models/draft2/*.blend*
 models/gallery/
 .claude/
 dist/
+sound-candidates/
