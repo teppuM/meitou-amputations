@@ -15,3 +15,5 @@ sound-candidates/
 prototype/
 models/ref/tex/
 release/
+art/*.png
+art/*.jpg
