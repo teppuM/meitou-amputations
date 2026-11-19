@@ -123,8 +123,7 @@ def main(data, out):
     bed = copy(m, by_name(m, 0, 'Skeleton Repair Bed'), bed_sid, 'Skeleton Operating Bed', Description=(
         'A repair bed for skeleton surgery. Lie a skeleton on it, then right-click them with your surgeon selected and choose Amputate... to remove '
         "limbs. The surgeon's Robotics decides how much oil the skeleton loses and how often it goes wrong. Repairs faster than a Skeleton Repair Bed."))
-    bed['f']['output rate'] = 10.0
-    bed['f']['power output'] = 0  # needs no generator: a machine that draws nothing always counts as powered
+    bed['f']['output rate'] = 10.0    # it draws the Skeleton Repair Bed's own power, so it needs a generator as that bed does
 
     surgery = copy(m, by_name(m, 21, 'Advanced Medicine'), surgery_sid, 'Surgery')
     surgery['refs'] = {'requirements': [(by_name(m, 21, 'Medicine'), 0, 0, 0)], 'cost': m[by_name(m, 21, 'Advanced Medicine')]['refs']['cost'],
