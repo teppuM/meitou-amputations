@@ -1,0 +1,31 @@
+[b]Requires MeitouClient 0.22.1 or newer ([url=https://meitou.kenshi.wiki]meitou.kenshi.wiki[/url]). The original Kenshi ignores this mod.[/b]
+
+Adds surgery: two operating tables where your surgeon removes a squad member's limb on purpose, for instance to make room for a better prosthetic.
+
+[list]
+[*][b]Operating Table[/b], for people. Unlocked by the research [b]Surgery[/b] (level 4, after Medicine, costs an Ancient Science Book). Heals like a bed.
+[*][b]Skeleton Operating Bed[/b], for skeletons. Unlocked by the research [b]Skeleton Operating Beds[/b] (level 4, after Skeleton Repair Beds, costs Engineering Research). Repairs faster than a Skeleton Repair Bed and, like it, needs power.
+[*]Both are indoor furniture, built inside a building you own like any bed.
+[/list]
+
+[b]How to operate[/b]
+[list]
+[*]Put the patient on the table (right-click the table and use it, as with a bed).
+[*]Select your surgeon, right-click the patient and choose [b]Amputate...[/b], then pick Left Arm, Right Arm, Left Leg or Right Leg. A limb that is already gone is greyed out.
+[*]The surgeon walks over and works at the table for a few seconds under an "Amputating" progress bar. Then the limb comes off and drops to the ground, and the stump is left already tended.
+[/list]
+
+[b]Skill matters[/b]
+[list]
+[*]The surgeon's First Aid (Robotics on a skeleton) decides how much blood (or oil) the patient loses: about a fifth of it for a master surgeon, about three fifths for a beginner.
+[*]A beginner usually botches the job and says so. A botched operation costs two and a half times as much, which can knock the patient out, and a second botched operation can kill.
+[*]The surgeon gains skill experience from each operation, and the patient toughness, as from any lost limb.
+[*]A skeleton has to go on the Skeleton Operating Bed and a person on the Operating Table; the surgeon tells you if the patient is on the wrong one.
+[/list]
+
+This mod contains code (OperatingTables.dll), as all MeitouClient code mods do. Source code and license (GPL 3.0 or later): [url=https://github.com/teppuM/meitou-amputations]github.com/teppuM/meitou-amputations[/url]
+
+[url=https://discord.gg/DVAHH2n9DR][img]https://raw.githubusercontent.com/VlcekM/MeitouClient/de994987a7360df10cb9b03fef81e37f4c032579/assets/branding/header.png[/img][/url]
+New to MeitouClient? Join its community on [url=https://discord.gg/DVAHH2n9DR]Discord[/url].
+
+[url=https://discord.com/users/134194201385500672]-thenamejame[/url]

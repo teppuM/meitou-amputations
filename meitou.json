@@ -1,7 +1,7 @@
 {
   "id": "operating-tables",
   "apiVersion": 2,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "assemblies": [
     "OperatingTables.dll"
   ],

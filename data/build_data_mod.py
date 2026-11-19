@@ -83,7 +83,9 @@ def write(path, records):
         b = v.encode('utf-8'); o += struct.pack('<i', len(b)) + b
 
     o = bytearray(struct.pack('<ii', 16, 1))
-    for v in ['thenamejame', 'Operating tables for limb amputations (MeitouClient code mod).', 'gamedata.base,rebirth.mod', '']:
+    # the description is the Steam Workshop one (the Forgotten Construction Set uploads the header's description), from description.txt beside this file
+    about = open(__file__[:-len('build_data_mod.py')] + 'description.txt', encoding='utf-8').read().strip()
+    for v in ['thenamejame', about, 'gamedata.base,rebirth.mod', '']:
         w_s(o, v)
     o += struct.pack('<ii', len(records) + 1, len(records))
     for r in records:
